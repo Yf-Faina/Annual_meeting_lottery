@@ -6,8 +6,39 @@
       </q-card-section>
 
       <div class="q-pa-md">
+        <div class="q-pa-md">
+          <div class="q-gutter-md row items-end">
+            <q-file
+              v-model="files"
+              label="选择 Excel 文件"
+              filled
+              outlined
+              use-chips
+              max-files="1"
+              accept=".xlsx,.xls"
+              style="max-width: 500px"
+            >
+              <template v-slot:prepend>
+                <q-icon name="description" />
+              </template>
+            </q-file>
+            <!-- 解析文件按钮 -->
+            <q-btn
+              v-if="files"
+              color="primary"
+              icon="upload"
+              label="解析文件"
+              @click="parseSelectedFile"
+              :loading="loading"
+              no-caps
+              unelevated
+              style="height: 56px; border-radius: 4px"
+              class="q-px-lg text-weight-medium"
+            />
+          </div>
+        </div>
         <q-table
-          title="查询结果"
+          title="表格内容"
           :rows="rows"
           :columns="columns"
           row-key="id"
@@ -23,44 +54,6 @@
           :rows-per-page-options="[3, 5, 7, 10, 20, 50]"
           :filter="filter"
         >
-          <template v-slot:top>
-            <div class="q-pa-md">
-              <div class="q-gutter-md row items-end">
-                <q-file
-                  v-model="files"
-                  label="选择 Excel 文件"
-                  filled
-                  counter
-                  :counter-label="counterLabelFn"
-                  max-files="1"
-                  accept=".xlsx,.xls"
-                  style="max-width: 500px"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="description" />
-                  </template>
-                </q-file>
-                <!-- 解析文件按钮 -->
-                <q-btn
-                  v-if="files"
-                  color="primary"
-                  icon="upload"
-                  label="解析文件"
-                  @click="parseSelectedFile"
-                  :loading="loading"
-                  no-caps
-                  unelevated
-                  style="height: 62px; border-radius: 4px"
-                  class="q-px-lg text-weight-medium"
-                />
-              </div>
-
-              <div v-if="loading" class="q-mt-md">
-                <q-linear-progress indeterminate color="primary" />
-                <div class="text-caption q-mt-xs">正在解析 Excel 文件...</div>
-              </div>
-            </div>
-          </template>
         </q-table>
       </div>
     </q-card>
@@ -76,17 +69,17 @@ import * as XLSX from 'xlsx';
 const files = ref([]);
 
 // 计数器标签函数
-const counterLabelFn = ({
-  totalSize,
-  filesNumber,
-  maxFiles,
-}: {
-  totalSize: string;
-  filesNumber: number;
-  maxFiles: string | number;
-}) => {
-  return `${filesNumber}${maxFiles ? `/${maxFiles}` : ''} 个文件${totalSize ? ` (${totalSize})` : ''}`;
-};
+// const counterLabelFn = ({
+//   totalSize,
+//   filesNumber,
+//   maxFiles,
+// }: {
+//   totalSize: string;
+//   filesNumber: number;
+//   maxFiles: string | number;
+// }) => {
+//   return `${filesNumber}${maxFiles ? `/${maxFiles}` : ''} 个文件${totalSize ? ` (${totalSize})` : ''}`;
+// };
 
 // 监听文件选择变化
 watch(files, (newFiles) => {
