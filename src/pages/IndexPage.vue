@@ -1,5 +1,43 @@
 <template>
   <q-page class="lottery-page">
+    <!-- 数据状态提示区 -->
+    <div v-if="store.totalCount === 0" class="data-warning">
+      <q-banner class="bg-warning text-dark">
+        <template v-slot:avatar>
+          <q-icon name="warning" color="dark" />
+        </template>
+        <div>
+          <div class="text-weight-bold">暂无参与人员数据</div>
+          <div>请先到"参与人"页面上传人员名单</div>
+        </div>
+      </q-banner>
+    </div>
+
+    <!-- 数据统计信息 -->
+    <div v-else class="data-info-section">
+      <div class="data-info">
+        <q-chip color="info" text-color="white" icon="people">
+          总人数: {{ totalPeople }}
+        </q-chip>
+        <q-chip color="positive" text-color="white" icon="table_restaurant">
+          总桌数: {{ tables.length }}
+        </q-chip>
+        <q-chip color="orange" text-color="white" icon="auto_awesome">
+          每桌最多10人
+        </q-chip>
+        <q-btn 
+          @click="refreshTables" 
+          color="grey-7" 
+          icon="refresh" 
+          size="sm" 
+          flat 
+          round
+          class="q-ml-md"
+        >
+          <q-tooltip>重新从数据源分桌</q-tooltip>
+        </q-btn>
+      </div>
+    </div>
     <!-- 奖品信息区 -->
     <div class="prize-info-section">
       <div class="prize-info">
@@ -101,10 +139,9 @@
             ]"
           >
             <div class="person-avatar">
-              <img :src="person.avatar || '/icons/favicon-96x96.png'" :alt="person.name" />
+              <img :src="person.avatar || '/icons/favicon-96x96.png'" />
             </div>
             <div class="person-info">
-              <div class="person-name">{{ person.name }}</div>
               <div class="person-dept">{{ person.department }}</div>
               <div class="person-id">工号: {{ person.employeeId }}</div>
             </div>
@@ -139,11 +176,12 @@
     <div v-if="winnerPerson" class="winner-display">
       <div class="winner-card">
         <div class="winner-avatar">
-          <img :src="winnerPerson.avatar || '/icons/favicon-96x96.png'" :alt="winnerPerson.name" />
+          <!-- <img :src="winnerPerson.avatar || '/icons/favicon-96x96.png'" :alt="winnerPerson.name" /> -->
+          <img :src="winnerPerson.avatar || '/icons/favicon-96x96.png'"/>
         </div>
         <div class="winner-info">
           <h2>🎉 恭喜中奖 🎉</h2>
-          <div class="winner-name">{{ winnerPerson.name }}</div>
+          <!-- <div class="winner-name">{{ winnerPerson.name }}</div> -->
           <div class="winner-details">
             <div>{{ winnerPerson.department }}</div>
             <div>工号: {{ winnerPerson.employeeId }}</div>
@@ -177,7 +215,7 @@
                 />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ record.person.name }}</q-item-label>
+                <!-- <q-item-label>{{ record.person.name }}</q-item-label> -->
                 <q-item-label caption
                   >{{ record.person.department }} | {{ record.tableName }}</q-item-label
                 >
@@ -198,14 +236,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { usePeopleStore } from '../stores/people';
+import type { RowData } from '../stores/people';
 
 // 类型定义
 interface Person {
-  id: string;
-  name: string;
+  id: string | number;
+  // name: string;
   department: string;
-  employeeId: string;
+  employeeId: string | number;
   avatar?: string;
   isPresent: boolean;
 }
@@ -233,46 +273,74 @@ interface WinnerRecord {
   time: string;
 }
 
-// 模拟数据
-const tables = ref<Table[]>([
-  {
-    id: '1',
-    name: '1号桌',
-    people: [
-      { id: '001', name: '张三', department: '技术部', employeeId: 'T001', isPresent: true },
-      { id: '002', name: '李四', department: '技术部', employeeId: 'T002', isPresent: true },
-      { id: '003', name: '王五', department: '产品部', employeeId: 'P001', isPresent: true },
-      { id: '004', name: '赵六', department: '设计部', employeeId: 'D001', isPresent: true },
-      { id: '005', name: '钱七', department: '运营部', employeeId: 'O001', isPresent: true },
-      { id: '006', name: '孙八', department: '市场部', employeeId: 'M001', isPresent: true },
-    ],
-  },
-  {
-    id: '2',
-    name: '2号桌',
-    people: [
-      { id: '007', name: '周九', department: '技术部', employeeId: 'T003', isPresent: true },
-      { id: '008', name: '吴十', department: '人事部', employeeId: 'H001', isPresent: true },
-      { id: '009', name: '郑一', department: '财务部', employeeId: 'F001', isPresent: true },
-      { id: '010', name: '王二', department: '技术部', employeeId: 'T004', isPresent: true },
-      { id: '011', name: '李三', department: '产品部', employeeId: 'P002', isPresent: true },
-      { id: '012', name: '张四', department: '设计部', employeeId: 'D002', isPresent: true },
-    ],
-  },
-  {
-    id: '3',
-    name: '3号桌',
-    people: [
-      { id: '013', name: '陈五', department: '运营部', employeeId: 'O002', isPresent: true },
-      { id: '014', name: '林六', department: '市场部', employeeId: 'M002', isPresent: true },
-      { id: '015', name: '黄七', department: '人事部', employeeId: 'H002', isPresent: true },
-      { id: '016', name: '刘八', department: '财务部', employeeId: 'F002', isPresent: true },
-      { id: '017', name: '马九', department: '技术部', employeeId: 'T005', isPresent: true },
-      { id: '018', name: '杨十', department: '产品部', employeeId: 'P003', isPresent: true },
-    ],
-  },
-]);
+const store = usePeopleStore();
 
+// 将 store 中的数据转换为 Person 格式并分桌
+const convertToPersons = (data: RowData[]): Person[] => {
+  return data.map(item => ({
+    id: item.id,
+    // name: (item.name || item.姓名 || item.员工姓名 || '未知姓名') as string,
+    department: (item.department || item.部门缩写 || '未知部门') as string,
+    employeeId: (item.雇员工号 || '未知工号') as string,
+    isPresent: true,
+  }));
+};
+
+// 按每桌10人分配桌子
+const generateTables = (persons: Person[]): Table[] => {
+  const tables: Table[] = [];
+  const peoplePerTable = 10;
+  
+  for (let i = 0; i < persons.length; i += peoplePerTable) {
+    const tablePeople = persons.slice(i, i + peoplePerTable);
+    const tableNumber = Math.floor(i / peoplePerTable) + 1;
+    
+    tables.push({
+      id: tableNumber.toString(),
+      name: `${tableNumber}号桌`,
+      people: tablePeople,
+    });
+  }
+  
+  return tables;
+};
+
+// 响应式数据
+const allPersons = ref<Person[]>([]);
+const tables = ref<Table[]>([]);
+
+// 初始化数据
+const initializeData = () => {
+  console.log('初始化数据...');
+  console.log('Store 数据:', store.peopleData);
+  
+  if (store.peopleData.length > 0) {
+    allPersons.value = convertToPersons(store.peopleData);
+    tables.value = generateTables(allPersons.value);
+    console.log('转换后的人员数据:', allPersons.value);
+    console.log('生成的桌子数据:', tables.value);
+  } else {
+    console.log('Store 中没有数据');
+    allPersons.value = [];
+    tables.value = [];
+  }
+};
+
+// 页面挂载时初始化数据
+onMounted(() => {
+  initializeData();
+});
+
+// 监听 store 数据变化
+const totalPeople = computed(() => store.totalCount);
+
+// 重新分桌的功能
+const refreshTables = () => {
+  initializeData();
+  resetAll();
+};
+
+// 奖品数据
 const prizes = ref<Prize[]>([
   { id: '1', name: 'iPhone 15 Pro', level: '一等奖', total: 1, remaining: 1 },
   { id: '2', name: 'iPad Air', level: '二等奖', total: 2, remaining: 2 },
