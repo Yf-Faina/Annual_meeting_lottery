@@ -5,3 +5,20 @@ declare namespace NodeJS {
     VUE_ROUTER_BASE: string | undefined;
   }
 }
+
+// Pinia 持久化插件类型声明
+import 'pinia'
+
+declare module 'pinia' {
+  export interface DefineStoreOptionsBase{
+    persist?: boolean
+  }
+}
+
+// import 'pinia'
+
+// declare module 'pinia' {
+//   export interface DefineStoreOptionsBase<S, Store>{
+//     persist?: boolean
+//   }
+// }

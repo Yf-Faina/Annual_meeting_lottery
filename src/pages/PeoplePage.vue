@@ -61,12 +61,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { Notify } from 'quasar';
+import { usePeopleStore } from '../stores/people';
+import type { RowData, TableColumn } from '../stores/people';
 import * as XLSX from 'xlsx';
 
 // 文件选择相关
 const files = ref([]);
+
+// 使用 Pinia store
+const peopleStore = usePeopleStore();
+
+// 页面初始化时从 store 恢复数据
+onMounted(() => {
+  if (peopleStore.isDataLoaded && peopleStore.peopleData.length > 0) {
+    console.log('从 Pinia store 恢复数据:', peopleStore.peopleData.length, '条记录');
+    rows.value = peopleStore.peopleData;
+    columns.value = peopleStore.columns;
+  }
+});
 
 // 计数器标签函数
 // const counterLabelFn = ({
@@ -129,6 +143,8 @@ watch(files, (newFiles) => {
     console.log('文件被清空，清空表格数据');
     rows.value = [];
     columns.value = [];
+    // 同时清空 store 中的数据
+    peopleStore.clearPeopleData();
   }
 });
 
@@ -237,6 +253,9 @@ const parseExcelFile = async (file: File) => {
         ...row,
       }));
 
+      // 将数据保存到 Pinia store
+      peopleStore.setPeopleData(rows.value, dynamicColumns);
+
       console.log('更新后的列:', columns.value);
       console.log('更新后的行数据:', rows.value);
 
@@ -270,24 +289,8 @@ const parseExcelFile = async (file: File) => {
 };
 
 // 表格相关数据
-// 定义行数据类型
-interface RowData {
-  id: string | number;
-  [key: string]: string | number | boolean | null | undefined;
-}
 
 const rows = ref<RowData[]>([]);
-
-// 定义列的类型接口
-interface TableColumn {
-  name: string;
-  label: string;
-  field: string | ((row: RowData) => string | number);
-  required?: boolean;
-  align?: 'left' | 'right' | 'center';
-  sortable?: boolean;
-  format?: (val: string | number) => string;
-}
 
 const columns = ref<TableColumn[]>([
   {
