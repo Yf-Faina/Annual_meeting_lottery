@@ -265,7 +265,7 @@
         </q-card-section>
         <q-card-section class="q-pt-none">
           <q-list>
-            <q-item v-for="record in winnerHistory" :key="record.id">
+            <q-item v-for="record in winnerStore.winnerHistory" :key="record.id">
               <q-item-section avatar>
                 <img
                   :src="record.person.avatar || '/icons/favicon-96x96.png'"
@@ -349,6 +349,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { usePeopleStore } from '../stores/people';
 import type { RowData } from '../stores/people';
+import { useWinnersStore } from 'src/stores/winner';
 
 // 奖品管理相关
 const prizeManageFab = ref(false);
@@ -390,12 +391,13 @@ interface Prize {
   weightFactor: number; // 权重影响因子
 }
 
-interface WinnerRecord {
-  id: string;
-  person: Person;
-  prize: string;
-  tableName: string;
-}
+// WinnerRecord 接口已在 winnerStore 中定义，这里不再需要
+// interface WinnerRecord {
+//   id: string;
+//   person: Person;
+//   prize: string;
+//   tableName: string;
+// }
 
 const store = usePeopleStore();
 
@@ -607,7 +609,8 @@ const isSelectingPerson = ref(false);
 const isTableHighlighting = ref(false);
 const isPersonHighlighting = ref(false);
 const showHistory = ref(false);
-const winnerHistory = ref<WinnerRecord[]>([]);
+// 使用 winnerStore 代替本地的 winnerHistory
+// const winnerHistory = ref<WinnerRecord[]>([]);
 
 // 滚动数字显示
 const displayTableNumber = ref('?');
@@ -702,14 +705,12 @@ const startPersonSelection = () => {
 const confirmWinner = () => {
   if (!winnerPerson.value || !selectedTable.value) return;
 
-  // 添加到中奖记录
-  const record: WinnerRecord = {
-    id: Date.now().toString(),
+  // 添加到中奖记录 - 使用 winnerStore
+  winnerStore.addWinnerRecord({
     person: winnerPerson.value,
     prize: currentPrize.value.name,
     tableName: selectedTable.value.name,
-  };
-  winnerHistory.value.unshift(record);
+  });
 
   // 减少奖品数量
   currentPrize.value.remaining--;
@@ -768,4 +769,6 @@ const selectPrize = (prize: Prize) => {
   currentPrize.value = prize;
   prizeManageFab.value = false;
 };
+
+const winnerStore = useWinnersStore();
 </script>

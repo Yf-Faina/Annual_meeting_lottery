@@ -12,7 +12,7 @@
           :rows="rows"
           :columns="columns"
           color="primary"
-          row-key="name"
+          row-key="id"
         >
           <template v-slot:top-right>
             <q-btn
@@ -30,8 +30,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { exportFile, useQuasar } from 'quasar';
+import { useWinnersStore } from '../stores/winner';
+import type { WinnerRecord } from '../stores/winner';
+
+// 使用 winnerStore
+const winnerStore = useWinnersStore();
 
 // 类型定义
 interface TableColumn {
@@ -39,190 +44,62 @@ interface TableColumn {
   required?: boolean;
   label: string;
   align?: 'left' | 'right' | 'center';
-  field: string | ((row: TableRow) => string | number);
-  format?: (val: string | number, row?: TableRow) => string;
+  field: string | ((row: WinnerRecord) => string | number);
+  format?: (val: string | number, row?: WinnerRecord) => string;
   sortable?: boolean;
-  sort?: (a: TableRow, b: TableRow) => number;
-}
-
-interface TableRow {
-  name: string;
-  calories: number;
-  fat: number;
-  carbs: number;
-  protein: number;
-  sodium: number;
-  calcium: string;
-  iron: string;
+  sort?: (a: WinnerRecord, b: WinnerRecord) => number;
 }
 
 // Quasar实例
 const $q = useQuasar();
 
-// 表格列定义
+// 表格列定义 - 改为中奖记录相关的列
 const columns = ref<TableColumn[]>([
   {
-    name: 'name',
+    name: 'timestamp',
     required: true,
-    label: '甜品名称 (100g)',
+    label: '中奖时间',
     align: 'left',
-    field: (row: TableRow) => row.name,
-    format: (val: string) => `${val}`,
+    field: 'timestamp',
+    format: (val: string | number) => new Date(Number(val)).toLocaleString('zh-CN'),
     sortable: true,
+    sort: (a: WinnerRecord, b: WinnerRecord) => b.timestamp - a.timestamp,
   },
   {
-    name: 'calories',
+    name: 'department',
     align: 'center',
-    label: '卡路里',
-    field: 'calories',
+    label: '部门',
+    field: (row: WinnerRecord) => row.person.department,
     sortable: true,
   },
   {
-    name: 'fat',
-    label: '脂肪 (g)',
-    field: 'fat',
+    name: 'employeeId',
+    label: '工号',
+    field: (row: WinnerRecord) => row.person.employeeId,
     sortable: true,
   },
   {
-    name: 'carbs',
-    label: '碳水化合物 (g)',
-    field: 'carbs',
-  },
-  {
-    name: 'protein',
-    label: '蛋白质 (g)',
-    field: 'protein',
-  },
-  {
-    name: 'sodium',
-    label: '钠 (mg)',
-    field: 'sodium',
-  },
-  {
-    name: 'calcium',
-    label: '钙 (%)',
-    field: 'calcium',
+    name: 'prize',
+    label: '奖品',
+    field: 'prize',
     sortable: true,
-    sort: (a: TableRow, b: TableRow) => parseInt(a.calcium, 10) - parseInt(b.calcium, 10),
   },
   {
-    name: 'iron',
-    label: '铁 (%)',
-    field: 'iron',
+    name: 'tableName',
+    label: '桌号',
+    field: 'tableName',
     sortable: true,
-    sort: (a: TableRow, b: TableRow) => parseInt(a.iron, 10) - parseInt(b.iron, 10),
   },
 ]);
 
-// 表格数据
-const rows = ref<TableRow[]>([
-  {
-    name: '冷冻酸奶',
-    calories: 159,
-    fat: 6.0,
-    carbs: 24,
-    protein: 4.0,
-    sodium: 87,
-    calcium: '14%',
-    iron: '1%',
-  },
-  {
-    name: '冰淇淋三明治',
-    calories: 237,
-    fat: 9.0,
-    carbs: 37,
-    protein: 4.3,
-    sodium: 129,
-    calcium: '8%',
-    iron: '1%',
-  },
-  {
-    name: '闪电泡芙',
-    calories: 262,
-    fat: 16.0,
-    carbs: 23,
-    protein: 6.0,
-    sodium: 337,
-    calcium: '6%',
-    iron: '7%',
-  },
-  {
-    name: '纸杯蛋糕',
-    calories: 305,
-    fat: 3.7,
-    carbs: 67,
-    protein: 4.3,
-    sodium: 413,
-    calcium: '3%',
-    iron: '8%',
-  },
-  {
-    name: '姜饼',
-    calories: 356,
-    fat: 16.0,
-    carbs: 49,
-    protein: 3.9,
-    sodium: 327,
-    calcium: '7%',
-    iron: '16%',
-  },
-  {
-    name: '软糖豆',
-    calories: 375,
-    fat: 0.0,
-    carbs: 94,
-    protein: 0.0,
-    sodium: 50,
-    calcium: '0%',
-    iron: '0%',
-  },
-  {
-    name: '棒棒糖',
-    calories: 392,
-    fat: 0.2,
-    carbs: 98,
-    protein: 0,
-    sodium: 38,
-    calcium: '0%',
-    iron: '2%',
-  },
-  {
-    name: '蜂窝糖',
-    calories: 408,
-    fat: 3.2,
-    carbs: 87,
-    protein: 6.5,
-    sodium: 562,
-    calcium: '0%',
-    iron: '45%',
-  },
-  {
-    name: '甜甜圈',
-    calories: 452,
-    fat: 25.0,
-    carbs: 51,
-    protein: 4.9,
-    sodium: 326,
-    calcium: '2%',
-    iron: '22%',
-  },
-  {
-    name: 'KitKat巧克力',
-    calories: 518,
-    fat: 26.0,
-    carbs: 65,
-    protein: 7,
-    sodium: 54,
-    calcium: '12%',
-    iron: '6%',
-  },
-]);
+// 表格数据 - 从 winnerStore 获取
+const rows = computed(() => winnerStore.winnerHistory);
 
 // CSV包装函数
 const wrapCsvValue = (
   val: string | number,
-  formatFn?: (val: string | number, row?: TableRow) => string,
-  row?: TableRow,
+  formatFn?: (val: string | number, row?: WinnerRecord) => string,
+  row?: WinnerRecord,
 ): string => {
   let formatted = formatFn !== undefined ? formatFn(val, row) : val;
 
@@ -241,26 +118,46 @@ const wrapCsvValue = (
 
 // 导出表格函数
 const exportTable = (): void => {
-  // naive encoding to csv format
-  const content = [columns.value.map((col) => wrapCsvValue(col.label))]
+  // 生成CSV内容
+  const csvContent = [columns.value.map((col) => wrapCsvValue(col.label))]
     .concat(
       rows.value.map((row) =>
         columns.value
-          .map((col) =>
-            wrapCsvValue(
-              typeof col.field === 'function'
-                ? col.field(row)
-                : row[col.field === undefined ? col.name : (col.field as keyof TableRow)],
-              col.format,
-              row,
-            ),
-          )
+          .map((col) => {
+            let fieldValue: string | number;
+            if (typeof col.field === 'function') {
+              fieldValue = col.field(row);
+            } else {
+              // 直接使用字段名访问 WinnerRecord 的属性
+              switch (col.field) {
+                case 'id':
+                  fieldValue = row.id;
+                  break;
+                case 'prize':
+                  fieldValue = row.prize;
+                  break;
+                case 'tableName':
+                  fieldValue = row.tableName;
+                  break;
+                case 'timestamp':
+                  fieldValue = row.timestamp;
+                  break;
+                default:
+                  fieldValue = '';
+              }
+            }
+            return wrapCsvValue(fieldValue, col.format, row);
+          })
           .join(','),
       ),
     )
     .join('\r\n');
 
-  const status = exportFile('table-export.csv', content, 'text/csv');
+  // 添加UTF-8 BOM来解决中文乱码问题
+  const BOM = '\uFEFF';
+  const contentWithBOM = BOM + csvContent;
+
+  const status = exportFile('winner-history.csv', contentWithBOM, 'text/csv;charset=utf-8');
 
   if (status !== true) {
     $q.notify({
