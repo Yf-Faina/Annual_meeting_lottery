@@ -16,21 +16,17 @@
     <!-- 数据统计信息 -->
     <div v-else class="data-info-section">
       <div class="data-info">
-        <q-chip color="info" text-color="white" icon="people">
-          总人数: {{ totalPeople }}
-        </q-chip>
+        <q-chip color="info" text-color="white" icon="people"> 总人数: {{ totalPeople }} </q-chip>
         <q-chip color="positive" text-color="white" icon="table_restaurant">
           总桌数: {{ tables.length }}
         </q-chip>
-        <q-chip color="orange" text-color="white" icon="auto_awesome">
-          每桌最多10人
-        </q-chip>
-        <q-btn 
-          @click="refreshTables" 
-          color="grey-7" 
-          icon="refresh" 
-          size="sm" 
-          flat 
+        <q-chip color="orange" text-color="white" icon="auto_awesome"> 每桌最多10人 </q-chip>
+        <q-btn
+          @click="refreshTables"
+          color="grey-7"
+          icon="refresh"
+          size="sm"
+          flat
           round
           class="q-ml-md"
         >
@@ -58,7 +54,7 @@
           {{ currentPrize.name }} ({{ currentPrize.level }})
         </q-chip>
         <div class="prize-count">剩余数量: {{ currentPrize.remaining }}</div>
-        
+
         <!-- 奖品管理弹出按钮 -->
         <q-fab
           v-model="prizeManageFab"
@@ -69,18 +65,18 @@
           direction="down"
           class="prize-fab"
         >
-          <q-fab-action 
-            v-for="prize in prizes" 
+          <q-fab-action
+            v-for="prize in prizes"
             :key="prize.id"
             :color="getPrizeColor(prize.level)"
-            @click="selectPrize(prize)" 
+            @click="selectPrize(prize)"
             :icon="prize.level === currentPrize.level ? 'check_circle' : 'local_activity'"
             :label="prize.level"
           />
-          <q-fab-action 
-            color="grey-7" 
-            @click="showPrizeEditDialog = true" 
-            icon="edit" 
+          <q-fab-action
+            color="grey-7"
+            @click="showPrizeEditDialog = true"
+            icon="edit"
             label="编辑奖品"
           />
         </q-fab>
@@ -115,12 +111,12 @@
               v-for="table in tables"
               :key="table.id"
               :class="[
-                'table-info-item', 
-                { 
+                'table-info-item',
+                {
                   selected: selectedTable?.id === table.id,
                   'low-weight': table.currentWeight <= 0,
-                  'high-weight': table.currentWeight > 0 && table.winnerCount === 0
-                }
+                  'high-weight': table.currentWeight > 0 && table.winnerCount === 0,
+                },
               ]"
               :title="`权重: ${table.currentWeight.toFixed(2)} | 中奖率: ${(table.winningRate * 100).toFixed(1)}% | 已中奖: ${table.winnerCount}人`"
             >
@@ -200,7 +196,7 @@
           >
             {{ isSelectingPerson ? '抽取中...' : '开始抽人' }}
           </q-btn>
-          <q-btn
+          <!-- <q-btn
             v-if="winnerPerson"
             @click="confirmWinner"
             color="positive"
@@ -208,7 +204,7 @@
             class="confirm-btn"
           >
             确认中奖
-          </q-btn>
+          </q-btn> -->
         </div>
       </div>
     </div>
@@ -225,20 +221,31 @@
           color="grey-6"
           class="winner-close-btn"
         />
-        
+
         <div class="winner-avatar">
-          <!-- <img :src="winnerPerson.avatar || '/icons/favicon-96x96.png'" :alt="winnerPerson.name" /> -->
-          <img :src="winnerPerson.avatar || '/icons/face.png'"/>
+          <img :src="winnerPerson.avatar || '/icons/face.png'" />
         </div>
         <div class="winner-info">
           <h2>🎉 恭喜中奖 🎉</h2>
-          <!-- <div class="winner-name">{{ winnerPerson.name }}</div> -->
           <div class="winner-details">
             <div>部门：{{ winnerPerson.department }}</div>
             <div>工号: {{ winnerPerson.employeeId }}</div>
             <div>桌号: {{ selectedTable?.name }}</div>
           </div>
           <div class="prize-won">获得: {{ currentPrize.name }}</div>
+
+          <!-- 将确认中奖按钮移到这里！ -->
+          <div class="winner-actions">
+            <q-btn
+              @click="confirmWinner"
+              color="positive"
+              size="xl"
+              class="confirm-winner-btn"
+              icon="check_circle"
+            >
+              确认中奖
+            </q-btn>
+          </div>
         </div>
       </div>
     </div>
@@ -289,20 +296,16 @@
         <q-card-section>
           <div class="text-h6">编辑奖品</div>
         </q-card-section>
-        
+
         <q-card-section class="q-pt-none">
           <div class="prize-edit-list">
             <div v-for="prize in prizes" :key="prize.id" class="prize-edit-item">
               <div class="prize-level-badge">
-                <q-chip 
-                  :color="getPrizeColor(prize.level)" 
-                  text-color="white" 
-                  size="sm"
-                >
+                <q-chip :color="getPrizeColor(prize.level)" text-color="white" size="sm">
                   {{ prize.level }}
                 </q-chip>
               </div>
-              
+
               <div class="prize-edit-controls">
                 <q-input
                   v-model="prize.name"
@@ -311,7 +314,7 @@
                   dense
                   class="prize-name-input"
                 />
-                
+
                 <q-input
                   v-model.number="prize.total"
                   label="总数量"
@@ -320,22 +323,19 @@
                   dense
                   min="1"
                   class="prize-total-input"
-                  @update:model-value="(val) => {
-                    const numVal = Number(val);
-                    if (prize.remaining > numVal) {
-                      prize.remaining = numVal;
+                  @update:model-value="
+                    (val) => {
+                      const numVal = Number(val);
+                      prize.remaining = numVal; // 始终保持一致
                     }
-                  }"
+                  "
                 />
-                
-                <div class="prize-remaining">
-                  剩余: {{ prize.remaining }}
-                </div>
+                <div class="prize-remaining">剩余: {{ prize.remaining }}</div>
               </div>
             </div>
           </div>
         </q-card-section>
-        
+
         <q-card-actions align="right">
           <q-btn flat label="取消" color="grey" v-close-popup />
           <q-btn flat label="保存" color="primary" @click="showPrizeEditDialog = false" />
@@ -368,12 +368,16 @@ interface Table {
   id: string;
   name: string;
   people: Person[];
-  // 加权抽样相关字段
-  totalPeople: number;        // 该桌总人数（固定值）
-  winnerCount: number;        // 该桌已中奖人数
-  weightedWinnerCount: number; // 加权中奖计数（考虑奖品等级）
-  currentWeight: number;      // 当前中奖权重
-  winningRate: number;        // 中奖率
+  totalPeople: number; // 该桌总人数（固定值）
+  winnerCount: number; // 该桌已中奖人数
+  weightedWinnerCount: number; // 加权中奖计数（考虑奖品等级），为累计值
+  currentWeight: number; // 当前中奖权重
+  winningRate: number; // 中奖率
+  prizeHistory: {
+    // 记录每次中奖的奖品权重
+    prizeId: string;
+    weightFactor: number;
+  }[];
 }
 
 interface Prize {
@@ -383,7 +387,7 @@ interface Prize {
   total: number;
   remaining: number;
   image?: string;
-  weightFactor: number;  // 权重影响因子
+  weightFactor: number; // 权重影响因子
 }
 
 interface WinnerRecord {
@@ -397,7 +401,7 @@ const store = usePeopleStore();
 
 // 将 store 中的数据转换为 Person 格式并分桌
 const convertToPersons = (data: RowData[]): Person[] => {
-  return data.map(item => ({
+  return data.map((item) => ({
     id: item.id,
     // name: (item.name || item.姓名 || item.员工姓名 || '未知姓名') as string,
     department: (item.department || item.部门缩写 || '未知部门') as string,
@@ -410,11 +414,11 @@ const convertToPersons = (data: RowData[]): Person[] => {
 const generateTables = (persons: Person[]): Table[] => {
   const tables: Table[] = [];
   const peoplePerTable = 10;
-  
+
   for (let i = 0; i < persons.length; i += peoplePerTable) {
     const tablePeople = persons.slice(i, i + peoplePerTable);
     const tableNumber = Math.floor(i / peoplePerTable) + 1;
-    
+
     tables.push({
       id: tableNumber.toString(),
       name: `${tableNumber}号桌`,
@@ -422,11 +426,12 @@ const generateTables = (persons: Person[]): Table[] => {
       totalPeople: tablePeople.length,
       winnerCount: 0,
       weightedWinnerCount: 0,
-      currentWeight: 1,  // 初始权重为1
-      winningRate: 0,    // 初始中奖率为0
+      currentWeight: 1,
+      winningRate: 0,
+      prizeHistory: [], // 初始化空数组
     });
   }
-  
+
   return tables;
 };
 
@@ -438,7 +443,7 @@ const tables = ref<Table[]>([]);
 const initializeData = () => {
   console.log('初始化数据...');
   console.log('Store 数据:', store.peopleData);
-  
+
   if (store.peopleData.length > 0) {
     allPersons.value = convertToPersons(store.peopleData);
     tables.value = generateTables(allPersons.value);
@@ -468,89 +473,118 @@ const refreshTables = () => {
 // 计算桌子权重的方法
 const calculateTableWeights = () => {
   // 计算所有奖品的总权重影响因子
-  const totalWeightFactor = prizes.value.reduce((sum, prize) => sum + (prize.total * prize.weightFactor), 0);
+  const totalWeightFactor = prizes.value.reduce(
+    (sum, prize) => sum + prize.total * prize.weightFactor,
+    0,
+  );
   // 计算平均每桌的中奖阈值
   const averageWeightPerTable = totalWeightFactor / Math.max(tables.value.length, 1);
-  
-  tables.value.forEach(table => {
+
+  tables.value.forEach((table) => {
     // 计算中奖率：已中奖人数 / 总人数
     table.winningRate = table.totalPeople > 0 ? table.winnerCount / table.totalPeople : 0;
-    
+
+    // 计算带权中奖计数 - 基于历史中奖记录
+    table.weightedWinnerCount = table.prizeHistory.reduce(
+      (sum, record) => sum + record.weightFactor,
+      0,
+    );
+
     // 新中奖权重公式：Weight = (1 - 中奖率) * 总人数
-    table.currentWeight = (1 - table.winningRate) * table.totalPeople;
-    
+    // 如果带权计数已超过阈值，将权重设为0（不会被选中）
+    if (table.weightedWinnerCount >= averageWeightPerTable) {
+      table.currentWeight = 0;
+    } else {
+      table.currentWeight = (1 - table.winningRate) * table.totalPeople;
+    }
   });
-  
-  
-  // 计算带权中奖计数
-  tables.weightedWinnerCount += prizes.
 
-
-  console.log('权重计算结果:', tables.value.map(t => ({
-    name: t.name,
-    winnerCount: t.winnerCount,
-    weightedWinnerCount: t.weightedWinnerCount,
-    winningRate: t.winningRate,
-    currentWeight: t.currentWeight,
-    threshold: averageWeightPerTable
-  })));
+  console.log(
+    '权重计算结果:',
+    tables.value.map((t) => ({
+      name: t.name,
+      winnerCount: t.winnerCount,
+      weightedWinnerCount: t.weightedWinnerCount,
+      winningRate: t.winningRate,
+      currentWeight: t.currentWeight,
+      threshold: averageWeightPerTable,
+      overThreshold: t.weightedWinnerCount >= averageWeightPerTable,
+    })),
+  );
 };
 
-// 基于权重的随机选择桌子
+//基于权重选桌子
 const selectTableByWeight = (): Table | null => {
   // 先更新所有桌子的权重
   calculateTableWeights();
-  
-  // 过滤出还有人没中奖的桌子
-  const availableTables = tables.value.filter(table =>
-    table.winnerCount < table.totalPeople //中奖人数小于桌上总人数
+
+  // 计算所有奖品的总权重影响因子
+  const totalWeightFactor = prizes.value.reduce(
+    (sum, prize) => sum + prize.total * prize.weightFactor,
+    0,
   );
-  
+  // 计算平均每桌的中奖阈值
+  const averageWeightPerTable = totalWeightFactor / Math.max(tables.value.length, 1);
+
+  // 过滤出符合以下条件的桌子：
+  // 1. 还有人没中奖的桌子 (winnerCount < totalPeople)
+  // 2. 带权中奖计数未超过平均阈值的桌子 (weightedWinnerCount < averageWeightPerTable)
+  const availableTables = tables.value.filter(
+    (table) =>
+      table.winnerCount < table.totalPeople && table.weightedWinnerCount < averageWeightPerTable,
+  );
+
   if (availableTables.length === 0) {
-    console.log('没有可用的桌子');
+    console.log('没有可用的桌子（所有桌子要么已全部中奖，要么已超过平均中奖阈值）');
     return null;
   }
-  
-  
-  
+
+  // 计算可用桌子的总权重
+  const totalWeight = availableTables.reduce((sum, table) => sum + table.currentWeight, 0);
+
   if (totalWeight <= 0) {
-    // 如果所有权重都为0，随机选择一个有人的桌子
-    const tablesWithPeople = tables.value.filter(table => table.people.length > 0);
-    if (tablesWithPeople.length === 0) return null;
-    
-    const randomIndex = Math.floor(Math.random() * tablesWithPeople.length);
-    return tablesWithPeople[randomIndex];
+    // 如果所有权重都为0，随机选择一个可用桌子
+    const randomIndex = Math.floor(Math.random() * availableTables.length);
+    return availableTables[randomIndex];
   }
-  
+
   // 生成随机数
   let randomValue = Math.random() * totalWeight;
-  
+
   // 根据权重选择桌子
   for (const table of availableTables) {
     randomValue -= table.currentWeight;
     if (randomValue <= 0) {
-      console.log(`选中桌子: ${table.name}, 权重: ${table.currentWeight}, 中奖率: ${table.winningRate}`);
+      console.log(
+        `选中桌子: ${table.name}, 权重: ${table.currentWeight}, ` +
+          `中奖率: ${table.winningRate}, 带权计数: ${table.weightedWinnerCount}, ` +
+          `阈值: ${averageWeightPerTable.toFixed(2)}`,
+      );
       return table;
     }
   }
-  
+
   // 兜底：返回最后一个可用桌子
   return availableTables[availableTables.length - 1];
 };
 
 // 更新桌子中奖信息
 const updateTableWinningInfo = (table: Table, prize: Prize) => {
-  // 增加中奖人数
-  table.winnerCount++;
-  // 增加加权中奖计数
-  table.weightedWinnerCount += prize.weightFactor;
+  table.winnerCount++; // 增加中奖人数
+
+  // 记录中奖信息
+  table.prizeHistory.push({
+    prizeId: prize.id,
+    weightFactor: prize.weightFactor,
+  });
+
   // 重新计算权重
   calculateTableWeights();
-  
+
   console.log(`桌子 ${table.name} 中奖更新:`, {
     winnerCount: table.winnerCount,
     weightedWinnerCount: table.weightedWinnerCount,
-    newWeight: table.currentWeight
+    newWeight: table.currentWeight,
   });
 };
 
@@ -593,10 +627,10 @@ const startTableSelection = () => {
 
   const interval = setInterval(() => {
     // 在滚动过程中随机显示桌号（纯视觉效果）
-    const availableTables = tables.value.filter(table => 
-      table.currentWeight > 0 && table.people.length > 0
+    const availableTables = tables.value.filter(
+      (table) => table.currentWeight > 0 && table.people.length > 0,
     );
-    
+
     if (availableTables.length > 0) {
       const randomIndex = Math.floor(Math.random() * availableTables.length);
       const randomTable = availableTables[randomIndex];
@@ -609,10 +643,10 @@ const startTableSelection = () => {
     count++;
     if (count >= maxCount) {
       clearInterval(interval);
-      
+
       // 使用加权随机算法最终选择桌子
       const finalSelectedTable = selectTableByWeight();
-      
+
       if (finalSelectedTable) {
         selectedTable.value = finalSelectedTable;
         displayTableNumber.value = finalSelectedTable.name.replace('号桌', '');
@@ -621,7 +655,7 @@ const startTableSelection = () => {
         console.log('没有可选择的桌子');
         displayTableNumber.value = '无';
       }
-      
+
       highlightedTable.value = null;
       isSelectingTable.value = false;
       isTableHighlighting.value = false;
@@ -717,11 +751,16 @@ const resetAll = () => {
 // 奖品管理方法
 const getPrizeColor = (level: string) => {
   switch (level) {
-    case '特等奖': return 'purple';
-    case '一等奖': return 'red';
-    case '二等奖': return 'orange';
-    case '三等奖': return 'blue';
-    default: return 'grey';
+    case '特等奖':
+      return 'purple';
+    case '一等奖':
+      return 'red';
+    case '二等奖':
+      return 'orange';
+    case '三等奖':
+      return 'blue';
+    default:
+      return 'grey';
   }
 };
 
