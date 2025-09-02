@@ -133,7 +133,7 @@
         <div class="table-controls">
           <q-btn
             :loading="isSelectingTable"
-            :disable="isSelectingPerson"
+            :disable="isSelectingPerson || currentPrize.remaining === 0"
             @click="startTableSelection"
             color="primary"
             size="lg"
@@ -350,6 +350,7 @@ import { ref, computed, onMounted } from 'vue';
 import { usePeopleStore } from '../stores/people';
 import type { RowData } from '../stores/people';
 import { useWinnersStore } from 'src/stores/winner';
+import { Notify } from 'quasar';
 
 // 奖品管理相关
 const prizeManageFab = ref(false);
@@ -428,7 +429,7 @@ const generateTables = (persons: Person[]): Table[] => {
       totalPeople: tablePeople.length,
       winnerCount: 0,
       weightedWinnerCount: 0,
-      currentWeight: 1,
+      currentWeight: 1 * tablePeople.length,
       winningRate: 0,
       prizeHistory: [], // 初始化空数组
     });
@@ -676,7 +677,9 @@ const startPersonSelection = () => {
 
   let count = 0;
   const maxCount = 15;
+  /* eslint-disable */
   let currentSpeed = 300;
+  /* eslint-disable */
 
   const interval = setInterval(() => {
     // 随机高亮人员
@@ -724,6 +727,13 @@ const confirmWinner = () => {
 
   // 减少奖品数量
   currentPrize.value.remaining--;
+  console.log(`奖品 ${currentPrize.value.name} 剩余数量: ${currentPrize.value.remaining}`);
+  if (currentPrize.value.remaining === 0) {
+    Notify.create({
+      message: '奖品数量已为0，不得进行下一轮抽奖',
+      color: 'negative',
+    });
+  }
 
   // 更新桌子的中奖信息和权重
   updateTableWinningInfo(selectedTable.value, currentPrize.value);
