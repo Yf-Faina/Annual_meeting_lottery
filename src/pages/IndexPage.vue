@@ -675,7 +675,8 @@ const startPersonSelection = () => {
   winnerPerson.value = null;
 
   let count = 0;
-  const maxCount = 20;
+  const maxCount = 15;
+  let currentSpeed = 300;
 
   const interval = setInterval(() => {
     // 随机高亮人员
@@ -686,6 +687,15 @@ const startPersonSelection = () => {
     }
 
     count++;
+
+    if (count < 5) {
+      currentSpeed = 300; // 开始较慢
+    } else if (count < maxCount - 3) {
+      currentSpeed = 120; // 中间较快
+    } else {
+      currentSpeed = 250; // 结束时放慢
+    }
+
     if (count >= maxCount) {
       clearInterval(interval);
       // 最终选择
@@ -772,3 +782,271 @@ const selectPrize = (prize: Prize) => {
 
 const winnerStore = useWinnersStore();
 </script>
+
+<style scoped>
+/* 现有样式保持不变... */
+
+/* 右侧人员选择区域样式调整 */
+.person-section {
+  flex: 1;
+  padding: 1rem;
+  border-radius: 12px;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* 添加相对定位，为按钮绝对定位做准备 */
+}
+
+.person-section h3 {
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* 人员网格调整 - 为按钮留出空间 */
+.person-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+  perspective: 1000px;
+  flex: 1; /* 占据剩余空间 */
+  margin-bottom: 80px; /* 为按钮预留底部空间 */
+}
+
+/* 人员控制按钮区域 - 新的定位方式 */
+.person-controls {
+  position: absolute;
+  bottom: 30%; /* 距离底部30%的位置 */
+  left: 50%; /* 水平居中 */
+  transform: translateX(-50%); /* 精确居中 */
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 10; /* 确保按钮在上层 */
+}
+
+/* 等待消息样式调整 */
+.waiting-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: #666;
+  font-size: 1.1rem;
+  height: 200px;
+  flex: 1;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .person-controls {
+    top: 25%; /* 小屏幕上稍微向上移动 */
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+  }
+  
+  .person-grid {
+    margin-bottom: 60px; /* 小屏幕上减少底部边距 */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .main-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .person-controls {
+    top: 20%;
+    padding: 0.6rem 1rem;
+    border-radius: 15px;
+  }
+  
+  .lottery-btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* 人员卡片基础样式 */
+.person-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 平滑过渡 */
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* 高亮动画效果 */
+.person-item.highlight {
+  transform: scale(1.05);
+  border-color: #ff6b35;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+  animation: pulse-highlight 0.6s ease-in-out;
+}
+
+/* 中奖者样式 */
+.person-item.winner {
+  transform: scale(1.1);
+  border-color: #4caf50;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  box-shadow: 0 12px 35px rgba(76, 175, 80, 0.5);
+  animation: winner-celebrate 1s ease-in-out;
+}
+
+/* 高亮脉冲动画 */
+@keyframes pulse-highlight {
+  0% {
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+  }
+  50% {
+    box-shadow: 0 12px 35px rgba(255, 107, 53, 0.7);
+    transform: scale(1.08);
+  }
+  100% {
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+    transform: scale(1.05);
+  }
+}
+
+/* 中奖庆祝动画 */
+@keyframes winner-celebrate {
+  0% {
+    transform: scale(1.05);
+  }
+  25% {
+    transform: scale(1.15) rotate(2deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(-1deg);
+  }
+  75% {
+    transform: scale(1.12) rotate(1deg);
+  }
+  100% {
+    transform: scale(1.1) rotate(0deg);
+  }
+}
+
+/* 人员头像样式 */
+.person-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.person-item.highlight .person-avatar {
+  transform: scale(1.1);
+}
+
+.person-item.winner .person-avatar {
+  transform: scale(1.2);
+}
+
+.person-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 人员信息样式 */
+.person-info {
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.person-item.highlight .person-info {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.person-item.winner .person-info {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.person-dept {
+  font-size: 0.85rem;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.person-id {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff; /* 确保颜色可见 */
+  display: block; /* 确保显示 */
+  visibility: visible; /* 确保可见 */
+}
+
+/* 人员网格布局优化 */
+.person-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+  perspective: 1000px; /* 3D 效果 */
+}
+
+/* 桌号滚动数字优化 */
+.rolling-number {
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 按钮悬停效果 */
+.lottery-btn {
+  transition: all 0.3s ease;
+}
+
+.lottery-btn:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 抽奖按钮加载状态 */
+.lottery-btn[loading] {
+  animation: button-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes button-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* 数字滚动效果 */
+.number-digit {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .person-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .person-item {
+    padding: 0.75rem;
+  }
+}
+</style>
