@@ -196,15 +196,6 @@
           >
             {{ isSelectingPerson ? '抽取中...' : '开始抽人' }}
           </q-btn>
-          <!-- <q-btn
-            v-if="winnerPerson"
-            @click="confirmWinner"
-            color="positive"
-            size="lg"
-            class="confirm-btn"
-          >
-            确认中奖
-          </q-btn> -->
         </div>
       </div>
     </div>
@@ -234,11 +225,10 @@
           </div>
           <div class="prize-won">获得: {{ currentPrize.name }}</div>
 
-          <!-- 将确认中奖按钮移到这里！ -->
+          <!-- 确认中奖按钮 -->
           <div class="winner-actions">
             <q-btn
               @click="confirmWinner"
-              color="positive"
               size="xl"
               class="confirm-winner-btn"
               icon="check_circle"
@@ -1105,5 +1095,71 @@ const winnerStore = useWinnersStore();
   .person-item {
     padding: 0.75rem;
   }
+}
+
+/* 确认按钮区域 - 优化样式 */
+.winner-actions {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.winner-actions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.8), transparent);
+}
+
+.confirm-winner-btn {
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 50px;
+  /* 修改为蓝紫色渐变 */
+  background: linear-gradient(135deg, #667eea 10%, #EE82EE 100%);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.confirm-winner-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s ease;
+}
+
+.confirm-winner-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.confirm-winner-btn:hover::before {
+  left: 100%;
+}
+
+.confirm-winner-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* 按钮图标动画 */
+.confirm-winner-btn .q-icon {
+  transition: all 0.3s ease;
 }
 </style>
