@@ -176,7 +176,7 @@
           >
             <div class="person-avatar">
               <!-- <img :src="person.avatar || '/icons/favicon-96x96.png'" /> -->
-              <img :src="person.avatar || '/icons/face.png'" />
+              <img :src="person.avatar || 'icons/face.png'" />
             </div>
             <div class="person-info">
               <div class="person-dept">部门: {{ person.department }}</div>
@@ -214,7 +214,7 @@
         />
 
         <div class="winner-avatar">
-          <img :src="winnerPerson.avatar || '/icons/face.png'" />
+          <img :src="winnerPerson.avatar || 'icons/face.png'" />
         </div>
         <div class="winner-info">
           <h2>🎉 恭喜中奖 🎉</h2>
