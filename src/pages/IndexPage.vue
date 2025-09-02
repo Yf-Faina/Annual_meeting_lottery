@@ -352,6 +352,9 @@ import type { RowData } from '../stores/people';
 import { useWinnersStore } from 'src/stores/winner';
 import { Notify } from 'quasar';
 
+//中奖礼花动效
+import confetti from 'canvas-confetti';
+
 // 奖品管理相关
 const prizeManageFab = ref(false);
 const showPrizeEditDialog = ref(false);
@@ -706,6 +709,8 @@ const startPersonSelection = () => {
       const finalSelectedPerson = selectedTable.value.people[finalIndex];
       if (finalSelectedPerson) {
         winnerPerson.value = finalSelectedPerson;
+        // 播放礼花动效
+        playConfettiAnimation();
       }
       highlightedPerson.value = null;
       isSelectingPerson.value = false;
@@ -767,6 +772,48 @@ const resetAll = () => {
   isTableHighlighting.value = false;
   isPersonHighlighting.value = false;
   displayTableNumber.value = '?';
+};
+
+// 播放礼花动效
+const playConfettiAnimation = () => {
+  const duration = 15 * 1000; // 15秒
+  const animationEnd = Date.now() + duration;
+  const defaults = { 
+    startVelocity: 30, 
+    spread: 360, 
+    ticks: 60, 
+    zIndex: 5000,
+    colors: ['#ff0000', '#ffffff', '#00ff00', '#87CEFA', '#BA55D3', '#FFD700'] // 彩色
+  };
+
+  function randomInRange(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+  }
+
+  const interval = setInterval(() => {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      return;
+    }
+
+    const particleCount = 50 * (timeLeft / duration);
+    
+    // 从左下角发射礼花
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+    });
+    
+    // 从右下角发射礼花
+    confetti({
+      ...defaults,
+      particleCount,
+      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+    });
+  }, 250);
 };
 
 // 奖品管理方法

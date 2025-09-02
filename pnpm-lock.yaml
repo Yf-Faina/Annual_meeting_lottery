@@ -11,6 +11,9 @@ importers:
       '@quasar/extras':
         specifier: ^1.16.4
         version: 1.17.0
+      canvas-confetti:
+        specifier: ^1.9.3
+        version: 1.9.3
       pinia:
         specifier: ^3.0.3
         version: 3.0.3(typescript@5.5.4)(vue@3.5.20(typescript@5.5.4))
@@ -949,6 +952,9 @@ packages:
 
   caniuse-lite@1.0.30001737:
     resolution: {integrity: sha512-BiloLiXtQNrY5UyF0+1nSJLXUENuhka2pzy2Fx5pGxqavdrxSCW4U6Pn/PoG3Efspi2frRbHpBV2XsrPE6EDlw==}
+
+  canvas-confetti@1.9.3:
+    resolution: {integrity: sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==}
 
   cfb@1.2.2:
     resolution: {integrity: sha512-KfdUZsSOw19/ObEWasvBP/Ac4reZvAGauZhs6S/gqNhXhI7cKwvlH7ulj+dOEYnca4bm4SGo8C1bTAQvnTjgQA==}
@@ -3507,6 +3513,8 @@ snapshots:
       tslib: 2.8.1
 
   caniuse-lite@1.0.30001737: {}
+
+  canvas-confetti@1.9.3: {}
 
   cfb@1.2.2:
     dependencies:

@@ -3,9 +3,9 @@
     <q-header bordered class="lottery-header" height-hint="98">
       <q-toolbar class="lottery-toolbar">
         <q-toolbar-title class="lottery-title">
-          <q-avatar class="logo-avatar">
+          <!-- <q-avatar class="logo-avatar">
             <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg" />
-          </q-avatar>
+          </q-avatar> -->
           尚睿公司年会抽奖系统
         </q-toolbar-title>
       </q-toolbar>
